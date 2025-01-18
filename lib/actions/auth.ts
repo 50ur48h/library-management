@@ -5,17 +5,17 @@ import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
 import { hash } from "bcryptjs";
 import { signIn } from "@/auth";
-// import { headers } from "next/headers";
-// import ratelimit from "@/lib/ratelimit";
-// import { redirect } from "next/navigation";
-// import { workflowClient } from "@/lib/workflow";
-// import config from "@/lib/config";
+import { headers } from "next/headers";
+import ratelimit from "@/lib/ratelimit";
+import { redirect } from "next/navigation";
+import { workflowClient } from "@/lib/workflow";
+import config from "@/lib/config";
 
 export const signInWithCredentials = async (params: Pick<AuthCredentials, "email" | "password">,) => {
     const { email, password } = params;
-    //const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
-    //const { success } = await ratelimit.limit(ip);
-    //if (!success) return redirect("/too-fast");
+    const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
+    const { success } = await ratelimit.limit(ip);
+    if (!success) return redirect("/too-fast");
 
     try {
         const result = await signIn("credentials", {email, password, redirect: false});
@@ -35,10 +35,10 @@ export const signInWithCredentials = async (params: Pick<AuthCredentials, "email
 export const signUp = async (params: AuthCredentials) => {
   const { fullName, email, universityId, password, universityCard } = params;
 
-//   const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
-//   const { success } = await ratelimit.limit(ip);
+  const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
+  const { success } = await ratelimit.limit(ip);
 
-  //if (!success) return redirect("/too-fast");
+  if (!success) return redirect("/too-fast");
 
   const existingUser = await db
     .select().from(users).where(eq(users.email, email)).limit(1);
